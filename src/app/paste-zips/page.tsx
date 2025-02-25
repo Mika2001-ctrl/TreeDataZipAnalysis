@@ -8,6 +8,7 @@ import axios from "axios";
 export default function PasteZips() {
     const [zipCodesInput, setZipCodesInput] = useState("");
     const [results, setResults] = useState<any[]>([]);
+    const [sortConfig, setSortConfig] = useState<{ key: string; direction: string } | null>(null);
 
     const fetchZipData = async () => {
         try {
@@ -38,14 +39,14 @@ export default function PasteZips() {
                         postalCode: zip,
                         city,
                         state,
-                        population: censusResponse.data[1]?.[1] || "N/A",
-                        housingUnits: censusResponse.data[1]?.[2] || "N/A",
-                        medianHomeValue: censusResponse.data[1]?.[3] || "N/A",
-                        housingUnitAge: censusResponse.data[1]?.[4] || "N/A",
-                        medianGrossRent: censusResponse.data[1]?.[5] || "N/A",
-                        homeownershipRate: `${homeownershipRate}%`,
-                        medianHouseholdIncome: censusResponse.data[1]?.[7] || "N/A",
-                        perCapitaIncome: censusResponse.data[1]?.[8] || "N/A",
+                        population: parseInt(censusResponse.data[1]?.[1] || "0"),
+                        housingUnits: parseInt(censusResponse.data[1]?.[2] || "0"),
+                        medianHomeValue: parseInt(censusResponse.data[1]?.[3] || "0"),
+                        housingUnitAge: parseInt(censusResponse.data[1]?.[4] || "0"),
+                        medianGrossRent: parseInt(censusResponse.data[1]?.[5] || "0"),
+                        homeownershipRate: parseFloat(homeownershipRate),
+                        medianHouseholdIncome: parseInt(censusResponse.data[1]?.[7] || "0"),
+                        perCapitaIncome: parseInt(censusResponse.data[1]?.[8] || "0"),
                     };
                 })
             );
@@ -55,6 +56,22 @@ export default function PasteZips() {
             console.error(error);
             alert("Failed to fetch data");
         }
+    };
+
+    const sortTable = (key: string) => {
+        let direction = "asc";
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === "asc") {
+            direction = "desc";
+        }
+
+        const sortedData = [...results].sort((a, b) => {
+            if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
+            if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+            return 0;
+        });
+
+        setResults(sortedData);
+        setSortConfig({ key, direction });
     };
 
     return (
@@ -91,14 +108,30 @@ export default function PasteZips() {
                                 <th className="border p-3">ZIP Code</th>
                                 <th className="border p-3">City</th>
                                 <th className="border p-3">State</th>
-                                <th className="border p-3">Population</th>
-                                <th className="border p-3">Housing Units</th>
-                                <th className="border p-3">Median Home Value ($)</th>
-                                <th className="border p-3">Housing Unit Age (Years)</th>
-                                <th className="border p-3">Median Gross Rent ($)</th>
-                                <th className="border p-3">Homeownership Rate (%)</th>
-                                <th className="border p-3">Median Household Income ($)</th>
-                                <th className="border p-3">Per Capita Income ($)</th>
+                                <th className="border p-3 cursor-pointer" onClick={() => sortTable("population")}>
+                                    Population {sortConfig?.key === "population" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                                </th>
+                                <th className="border p-3 cursor-pointer" onClick={() => sortTable("housingUnits")}>
+                                    Housing Units {sortConfig?.key === "housingUnits" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                                </th>
+                                <th className="border p-3 cursor-pointer" onClick={() => sortTable("medianHomeValue")}>
+                                    Median Home Value ($) {sortConfig?.key === "medianHomeValue" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                                </th>
+                                <th className="border p-3 cursor-pointer" onClick={() => sortTable("housingUnitAge")}>
+                                    Housing Unit Age (Years) {sortConfig?.key === "housingUnitAge" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                                </th>
+                                <th className="border p-3 cursor-pointer" onClick={() => sortTable("medianGrossRent")}>
+                                    Median Gross Rent ($) {sortConfig?.key === "medianGrossRent" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                                </th>
+                                <th className="border p-3 cursor-pointer" onClick={() => sortTable("homeownershipRate")}>
+                                    Homeownership Rate (%) {sortConfig?.key === "homeownershipRate" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                                </th>
+                                <th className="border p-3 cursor-pointer" onClick={() => sortTable("medianHouseholdIncome")}>
+                                    Median Household Income ($) {sortConfig?.key === "medianHouseholdIncome" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                                </th>
+                                <th className="border p-3 cursor-pointer" onClick={() => sortTable("perCapitaIncome")}>
+                                    Per Capita Income ($) {sortConfig?.key === "perCapitaIncome" ? (sortConfig.direction === "asc" ? "↑" : "↓") : ""}
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -112,7 +145,7 @@ export default function PasteZips() {
                                     <td className="border p-2">{result.medianHomeValue}</td>
                                     <td className="border p-2">{result.housingUnitAge}</td>
                                     <td className="border p-2">{result.medianGrossRent}</td>
-                                    <td className="border p-2">{result.homeownershipRate}</td>
+                                    <td className="border p-2">{result.homeownershipRate}%</td>
                                     <td className="border p-2">{result.medianHouseholdIncome}</td>
                                     <td className="border p-2">{result.perCapitaIncome}</td>
                                 </tr>
