@@ -11,7 +11,7 @@ export default function Dashboard() {
     const fetchData = async () => {
         try {
             const response = await axios.get(
-                `https://api.census.gov/data/2021/acs/acs5?get=NAME,B01003_001E,B25001_001E,B25077_001E,B25034_001E,B25064_001E,B25003_002E,B19013_001E,B19301_001E&for=zip%20code%20tabulation%20area:${zipCode}&key=47f8aff22fef90dca9b6c42bf4399443ffff47aa`
+                `https://api.census.gov/data/2021/acs/acs5?get=NAME,B01003_001E,B25001_001E,B25077_001E,B25034_001E,B25064_001E,B25003_001E,B19013_001E,B19301_001E&for=zip%20code%20tabulation%20area:${zipCode}&key=47f8aff22fef90dca9b6c42bf4399443ffff47aa`
             );
             setData(response.data);
         } catch (error) {
